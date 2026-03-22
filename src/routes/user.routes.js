@@ -4,6 +4,17 @@ import { registerUser } from "../controllers/user.controllers";
 
 const router = Router()
 
-router.route("/register").post(registerUser)
+router.route("/register").post(
+    Upload.fields([
+        {
+            name: "avatar",
+            maxCount: 1
+        },
+        {
+            name: "coverImage",
+            maxCount: 1
+        }
+    ]),
+    registerUser)
 
 export default router;
