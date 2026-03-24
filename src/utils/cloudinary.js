@@ -8,7 +8,7 @@ cloudinary.config({
 });
 
 
-const uploadOncloudinary = async (localFilePath) => {
+const uploadOnCloudinary = async (localFilePath) => {
     try {
         if(!localFilePath) return null //upload the file cloudinary
         const response = await cloudinary.uploader.upload(localFilePath, {
@@ -26,4 +26,4 @@ const uploadOncloudinary = async (localFilePath) => {
 
 // cloudinary.v2.uploader.upload("https://res.cloudinary.com/dbqxwiqwz/image/upload/v1771422644/main-sample.png", { public_id: "main_sample"}, function(error, result)  {console.log(result); });
 
-export {uploadOncloudinary};
+export {uploadOnCloudinary};

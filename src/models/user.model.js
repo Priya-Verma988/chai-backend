@@ -1,5 +1,5 @@
 import mongoose, {Schema} from "mongoose";
-import jwt, { JsonWebTokenError } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt"
 
 const userSchema = new Schema({
@@ -38,21 +38,21 @@ const userSchema = new Schema({
         ref: "Vedio"
         }
     ],
-    passward:{
+    password:{
         type: String,
-        required: [true, 'Passward is required']
+        required: [true, 'Password is required']
     },
     refreshToken:{
-        type: toString
+        type: String
     }
 
 
 }, {timestamps: true});
 
 userSchema.pre("save", async function (next) {
-    if(!this.isModified("passward")) return next();
+    if(!this.isModified("password")) return next();
 
-    this.passward = await bcrypt.hash(this.passward, 10) 
+    this.password = await bcrypt.hash(this.password, 10) 
     next()
 })
 
@@ -68,9 +68,9 @@ userSchema.methods.generateAccessToken = function (){
             username: this.username,
             fullname: this.fullname
         },
-        process.env.ACCESS_TOKEN_SECRECT,
+        process.env.ACCESS_TOKEN_SECRET,
         {
-           expiredIn: process.env.ACCESS_TOKEN_EXPIRY 
+           expiresIn: process.env.ACCESS_TOKEN_EXPIRY 
         }
     )
 }
@@ -81,7 +81,7 @@ userSchema.methods.generateRefreshToken = function () {
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
-            expiredIn: process.env.REFRESH_TOKEN_EXPIRY
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
         }
     )
 }
