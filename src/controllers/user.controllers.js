@@ -6,7 +6,6 @@ import { apiResponse } from "../utils/apiResponse.js";
 import { trusted } from "mongoose";
 import jwt from "jsonwebtoken"
 
-
 const generateAccessAndRefreshToken = async(userId) => {
     try {
         const user = await User.findById(userId)
@@ -151,7 +150,7 @@ const loginUser = asyncHandler(async(req, res) => {
 })
 
 const logoutUser = asyncHandler(async(req, res) => {
-    User.findByIdAndUpdate(
+   const user = await User.findByIdAndUpdate(
         req.user._id,
         {
             $set: {
