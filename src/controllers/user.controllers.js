@@ -15,7 +15,7 @@ const generateAccessAndRefreshToken = async(userId) => {
         user.refreshToken = refreshToken
         await user.save({ validateBeforeSave: false})
 
-        return(accessToken, refreshToken)
+        return{ accessToken, refreshToken }
 
     } catch (error) {
         throw new apiError(500, "Something went wrong while generating refresh and access token")
@@ -84,7 +84,7 @@ const registerUser = asyncHandler( async (req, res) => {
     })
 
     const createdUser = await User.findById(user._id).select(
-        "-passward -refreshToken"
+        "-password -refreshToken"
     )
 
     if (!createdUser) {
@@ -131,7 +131,7 @@ const loginUser = asyncHandler(async(req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: true
+        secure: process.env.NODE_ENV === "production"
     }
 
     return res
@@ -164,7 +164,7 @@ const logoutUser = asyncHandler(async(req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: true
+        secure: process.env.NODE_ENV === "production"
     }
 
     return res
@@ -199,7 +199,7 @@ try {
     
     const options = {
         httpOnly: true,
-        secure: true
+        secure: process.env.NODE_ENV === "production"
     }
     
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id)
@@ -210,7 +210,7 @@ try {
     .json(
         new apiResponse(
             200,
-            {accessToken, refreshToken: newRefreshToken},
+            {accessToken, refreshToken: new refreshToken},
             "Access token refreshed"
         )
     )
@@ -243,7 +243,7 @@ const changeCurrentPassword = asyncHandler(async(req, res) => {
 const getCurrentUser = asyncHandler(async(req, res) => {
     return res
     .status(200)
-    .json(200, req.user, "Current user fetched successfully")
+    .json( new apiResponse (200, req.user, "Current user fetched successfully"))
 })
 
 const updateAccountDetails = asyncHandler(async(req, res) => {
@@ -253,7 +253,7 @@ const updateAccountDetails = asyncHandler(async(req, res) => {
         throw new apiError(400, "All fields are required")
     }
 
-    const user = User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set: {
@@ -266,7 +266,7 @@ const updateAccountDetails = asyncHandler(async(req, res) => {
 
     return res
     .status(200)
-    .json(new apiResponse(200, useSyncExternalStore, "Accont details update successfully"))
+    .json(new apiResponse(200, user, "Accont details update successfully"))
 })
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
@@ -289,11 +289,11 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
             avatar: avatar.url
         }
     },
-    {new: set}
+    {new: true}
    ).select("-password")
 
    return res 
-   .ststus(200)
+   .status(200)
    .json(
     new apiResponse(200, user, "Avatar image updated successfully")
    )
@@ -320,11 +320,11 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
             coverImage: coverImage.url
         }
     },
-    {new: set}
+    {new: true}
    ).select("-password")
 
    return res 
-   .ststus(200)
+   .status(200)
    .json(
     new apiResponse(200, user, "Cover image updated successfully")
    )
@@ -352,7 +352,7 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
             }
         },
         {
-            $loolup: {
+            $lookup: {
                from: "subscriptions",
                 localField: "_id",
                 foreignField: "subscriber",
