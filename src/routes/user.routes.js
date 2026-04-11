@@ -1,50 +1,50 @@
-import {Router} from "express";
-import multer from "multer";
+import { Router } from "express";
 
-import { loginUser, 
-    logoutUser,
-    registerUser, 
-    refreshAccessToken, 
-    changeCurrentPassword, 
-    getCurrentUser, 
-    updateAccountDetails, 
-    updateUserAvatar, 
-    updateUserCoverImage, 
-    getUserChannelProfile, 
-    getWatchHistory
+import {
+  loginUser,
+  logoutUser,
+  registerUser,
+  refreshAccessToken,
+  changeCurrentPassword,
+  getCurrentUser,
+  updateProfile,
+  getUserChannelProfile,
+  getWatchHistory
 } from "../controllers/user.controllers.js";
+
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
 
-
 const router = Router();
 
-router.route("/register").post(
-    upload.fields([
-        {
-            name: "avatar",
-            maxCount: 1
-        },
-        {
-            name: "coverImage",
-            maxCount: 1
-        }
-    ]),
-    registerUser)
+//  AUTH ROUTES
+router.post(
+  "/register",
+  upload.fields([
+    { name: "avatar", maxCount: 1 },
+    { name: "coverImage", maxCount: 1 }
+  ]),
+  registerUser
+);
 
-router.route("/login").post(loginUser) 
+router.post("/login", loginUser);
+router.post("/logout", verifyJWT, logoutUser);
+router.post("/refresh-token", refreshAccessToken);
 
-// secured routes 
-router.route("/logout").post(verifyJWT, logoutUser)
-router.route("/refresh-token").post(refreshAccessToken)
-router.route("/change-password").post(verifyJWT, changeCurrentPassword)
-router.route("/current-user").get(verifyJWT, getCurrentUser)
-router.route("/update-account").patch(verifyJWT, updateAccountDetails)
-router.route("/update-avater").patch(verifyJWT, upload.single("avatar"),  updateUserAvatar)
-router.route("/cover-image").patch(verifyJWT, upload.single("coverImage"),updateUserCoverImage)
-router.route("/c/:username").get(verifyJWT, getUserChannelProfile)
-router.route("/history").get(verifyJWT, getWatchHistory)
+// 👤 USER ROUTES
+router.get("/current-user", verifyJWT, getCurrentUser);
+router.post("/change-password", verifyJWT, changeCurrentPassword);
 
+//  MAIN PROFILE UPDATE (IMPORTANT)
+router.patch(
+  "/update-profile",
+  verifyJWT,
+  upload.single("avatar"),
+  updateProfile
+);
 
+//  EXTRA FEATURES
+router.get("/c/:username", verifyJWT, getUserChannelProfile);
+router.get("/history", verifyJWT, getWatchHistory);
 
 export default router;

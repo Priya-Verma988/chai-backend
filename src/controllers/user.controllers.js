@@ -435,6 +435,29 @@ const getWatchHistory = asyncHandler(async(req, res) => {
     .json(new apiResponse(200, user[0].watchHistory, "Watch History fetched successfully"))
 })
 
+const updateProfile = asyncHandler(async (req, res) => {
+  const { fullName } = req.body;
+
+  let avatarUrl;
+
+  if (req.file) {
+    const uploaded = await uploadOnCloudinary(req.file.path);
+    avatarUrl = uploaded.url;
+  }
+
+  const user = await User.findById(req.user._id);
+
+  if (fullName) user.fullName = fullName;
+  if (avatarUrl) user.avatar = avatarUrl;
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    data: user
+  });
+});
+
 
 
 export {
@@ -448,5 +471,6 @@ export {
     updateUserAvatar, 
     updateUserCoverImage,
     getUserChannelProfile,
-    getWatchHistory  
+    getWatchHistory,
+    updateProfile  
 }
