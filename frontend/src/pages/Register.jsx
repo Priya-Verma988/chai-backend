@@ -22,7 +22,7 @@ export default function Register() {
     try {
       setLoading(true);
 
-      const res = await api.post("/register", formData);
+      const res = await api.post("/users/register", formData);
 
       alert("Register Successful ✅");
       console.log(res.data);

@@ -3,6 +3,7 @@ import { apiError } from "../utils/apiError.js";
 import {User} from "../models/user.model.js";
 import {uploadOnCloudinary} from "../utils/cloudinary.js";
 import { apiResponse } from "../utils/apiResponse.js";
+
 import { trusted } from "mongoose";
 import jwt from "jsonwebtoken"
 
@@ -141,9 +142,7 @@ const loginUser = asyncHandler(async(req, res) => {
     .json(
         new apiResponse(
             200,
-            {
-                user: loggedInUser, accessToken, refreshToken
-            },
+            loggedInUser,
             "User logged in Successfully"
         )
     )
@@ -445,16 +444,20 @@ const updateProfile = asyncHandler(async (req, res) => {
     avatarUrl = uploaded.url;
   }
 
-  const user = await User.findById(req.user._id);
-
-  if (fullName) user.fullName = fullName;
-  if (avatarUrl) user.avatar = avatarUrl;
-
-  await user.save();
+  const updatedUser = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        ...(fullName && { fullName }),
+        ...(avatarUrl && { avatar: avatarUrl }),
+      },
+    },
+    { new: true } // 🔥 MOST IMPORTANT
+  ).select("-password -refreshToken");
 
   res.status(200).json({
     success: true,
-    data: user
+    data: updatedUser
   });
 });
 

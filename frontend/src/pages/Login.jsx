@@ -12,9 +12,10 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    
 
     try {
-      const res = await api.post("/login", {
+      const res = await api.post("/users/login", {
         email,
         password
       });
@@ -22,7 +23,7 @@ export default function Login() {
       setUser(res.data.data);
       alert("Login Successful ");
 
-      navigate("/dashboard");
+      navigate("/home");
 
     } catch (error) {
       console.error(error);

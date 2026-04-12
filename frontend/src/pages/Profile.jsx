@@ -1,12 +1,18 @@
 import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { api } from "../api/axios";
+import { useEffect } from "react";
 
 export default function Profile() {
   const { user, setUser } = useContext(AuthContext);
 
   const [edit, setEdit] = useState(false);
-  const [fullName, setFullName] = useState(user?.fullName);
+
+  const [fullName, setFullName] = useState("");
+  useEffect(() => {
+    setFullName(user?.fullName || "")
+  }, [user]);
+
   const [avatar, setAvatar] = useState(null);
   const [preview, setPreview] = useState(user?.avatar);
 
@@ -18,7 +24,9 @@ export default function Profile() {
       formData.append("fullName", fullName);
       if (avatar) formData.append("avatar", avatar);
 
-      const res = await api.patch("/update-profile", formData);
+      const res = await api.patch("/users/update-profile", formData, {
+        withCredentials: true
+      });
 
       setUser(res.data.data); // 🔥 update UI instantly
       setEdit(false);
